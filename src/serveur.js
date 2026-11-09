@@ -9,6 +9,8 @@ import * as S from './stockage.js';
 import { genererDevisPdf } from './pdf/devis-pdf.js';
 import { calculerRappels } from './regles/rappels.js';
 import { discuter, MODELE } from './agent/agent.js';
+import { creerPlan, saisirMesures, accepterDevisRevise } from './chantier.js';
+import { genererFicheMetreurPdf } from './pdf/fiche-metreur-pdf.js';
 
 const app = express();
 app.use(express.json({ limit: '1mb' }));
@@ -43,6 +45,17 @@ app.get('/api/devis/:id/pdf', route(async (req, res) => {
 app.post('/api/devis/:id/statut', route(async (req, res) => res.json(await S.changerStatutDevis(req.params.id, req.body.statut))));
 app.post('/api/devis/:id/avance', route(async (req, res) => res.json(await S.enregistrerAvance(req.params.id, req.body.montant))));
 
+// ───────────── Plan de chantier et mesures ─────────────
+app.post('/api/devis/:id/plan', route(async (req, res) => res.json(await creerPlan(req.params.id, req.body.etages))));
+app.post('/api/devis/:id/mesures', route(async (req, res) => res.json(await saisirMesures(req.params.id, req.body.mesures))));
+app.post('/api/devis/:id/accepter', route(async (req, res) => res.json(await accepterDevisRevise(req.params.id))));
+app.get('/api/devis/:id/fiche-metreur', route(async (req, res) => {
+  const devis = await S.lireDevis(req.params.id);
+  if (!devis?.planChantier) return res.status(404).json({ erreur: 'Pas de plan de chantier pour ce devis' });
+  const pdf = await genererFicheMetreurPdf(devis, await S.lireClient(devis.clientId));
+  res.type('application/pdf').set('Content-Disposition', `inline; filename="Fiche-metreur-${devis.id}.pdf"`).send(pdf);
+}));
+
 // ───────────── Rappels ─────────────
 async function rappels() {
   const clients = await S.listerClients();
@@ -54,7 +67,8 @@ async function rappels() {
     avance: d.avances.reduce((s, a) => s + a.montant, 0),
     planChantier: d.planChantier || null, datePlan: d.datePlan,
     mesuresValidees: d.mesuresValidees, dateMesures: d.dateMesures,
-    devisRevise: d.remplacePar ? { valideParClient: false } : null, fabricationLancee: d.fabricationLancee,
+    devisRevise: d.attenteAccordClient ? { valideParClient: false } : null, dateDevisRevise: d.dateDevisRevise,
+    fabricationLancee: d.fabricationLancee,
   })));
 }
 app.get('/api/rappels', route(async (req, res) => res.json(await rappels())));

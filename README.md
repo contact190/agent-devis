@@ -23,8 +23,10 @@ en utilisant **le même moteur de calcul que CalculDevis**.
 - [x] Interface clients simple + discussion avec l'agent + rappels (`npm start` → http://localhost:3000)
 - [x] Clients et devis stockés à part de CalculDevis (`src/stockage.js`, fichier local en attendant les tables Supabase)
 - [x] Avance : passage automatique en commande à 50 % du TTC, devis révisé qui remplace l'ancien
-- [ ] Avance ≥ 50 % → commande → plan de chantier obligatoire (description texte)
-- [ ] Fiche du métreur, mesures réelles, règle des 100 mm (devis révisé automatique)
+- [x] Avance ≥ 50 % → commande → plan de chantier obligatoire, créé par l'agent depuis une description (`src/chantier.js`)
+- [x] Contrôle du plan : chaque ligne du devis placée autant de fois que sa quantité
+- [x] Fiche du métreur PDF (`src/pdf/fiche-metreur-pdf.js`)
+- [x] Mesures réelles (écran + agent) : écart > +100 mm → devis révisé automatique (une ligne par ouverture, cotes réelles, avance conservée), < −100 mm → alerte ; accord client avant fabrication
 - [ ] Fiches de coupe, vitrage, besoins d'achat
 
 ## Plus tard

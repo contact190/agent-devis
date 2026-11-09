@@ -12,7 +12,7 @@
     "discuter": "node --env-file=.env scripts/discuter.mjs",
     "test:outils": "node scripts/test-outils.mjs",
     "test:agent": "node scripts/test-agent-simule.mjs",
-    "test": "node scripts/test-moteur.mjs && node scripts/test-outils.mjs && node scripts/test-agent-simule.mjs && node scripts/test-stockage.mjs",
+    "test": "node scripts/test-moteur.mjs && node scripts/test-outils.mjs && node scripts/test-agent-simule.mjs && node scripts/test-stockage.mjs && node scripts/test-chantier.mjs",
     "start": "node --env-file-if-exists=.env src/serveur.js",
     "exemple": "node scripts/exemple-devis.mjs"
   },

@@ -5,6 +5,7 @@ import { FormulaEngine } from '../engine/formula-engine.js';
 import { getCatalogue } from '../catalogue.js';
 import { optionsVolet, glissierePourVolet } from '../regles/volet.js';
 import * as stockage from '../stockage.js';
+import { creerPlan, saisirMesures, accepterDevisRevise } from '../chantier.js';
 
 const norm = s => String(s || '').replace(/\s+/g, '').toLowerCase();
 const arrondi = n => Math.round((Number(n) || 0) * 100) / 100;
@@ -190,6 +191,7 @@ export async function calculerMenuiserie(m) {
       volet: (bom.shutters || []).map(s => ({ nom: s.name, qte: s.qty, longueur: arrondi(s.length) })),
     },
     configuration: config,
+    entree: m, // description d'origine : sert à recalculer avec les mesures réelles
   };
 }
 
@@ -327,6 +329,70 @@ OUTILS.push(
       if (!r) return { ok: false, erreurs: [`Devis inconnu : ${devisId}`] };
       return { ok: true, statut: r.devis.statut, totalAvances: r.totalAvances, manquePour50: r.manque, totalTTC: r.devis.totalTTC };
     },
+  },
+  {
+    name: 'creer_plan_chantier',
+    description: 'Crée le plan de chantier d’un devis en commande, à partir de la description du client : étages > appartements > ouvertures. Chaque ouverture indique le numéro de ligne du devis qu’elle reçoit ; chaque ligne doit être placée autant de fois que sa quantité.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        devisId: { type: 'string' },
+        etages: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              nom: { type: 'string', description: 'ex. RDC, 1er, 2e' },
+              appartements: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    nom: { type: 'string', description: 'ex. A, B, Local 1' },
+                    ouvertures: { type: 'array', items: { type: 'object', properties: { ligne: { type: 'integer' }, emplacement: { type: 'string', description: 'ex. chambre 1, séjour' } }, required: ['ligne'] } },
+                  },
+                  required: ['nom', 'ouvertures'],
+                },
+              },
+            },
+            required: ['nom', 'appartements'],
+          },
+        },
+      },
+      required: ['devisId', 'etages'],
+    },
+    executer: ({ devisId, etages }) => creerPlan(devisId, etages),
+  },
+  {
+    name: 'saisir_mesures',
+    description: 'Enregistre les mesures réelles du métreur (par repère d’ouverture, ex. 1er-A-2). Calcule les écarts ; quand tout est mesuré : validation, ou devis révisé automatique si un écart dépasse +100 mm.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        devisId: { type: 'string' },
+        mesures: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              repere: { type: 'string' }, L: { type: 'number' }, H: { type: 'number' },
+              profondeur: { type: 'number', description: 'Épaisseur du mur, obligatoire s’il y a un volet' },
+              hauteurPoignee: { type: 'number' }, sens: { type: 'string', enum: ['gauche', 'droit'] },
+              lv: { type: 'number', description: 'Largeur du volet si différente' }, observation: { type: 'string' },
+            },
+            required: ['repere', 'L', 'H'],
+          },
+        },
+      },
+      required: ['devisId', 'mesures'],
+    },
+    executer: ({ devisId, mesures }) => saisirMesures(devisId, mesures),
+  },
+  {
+    name: 'accepter_devis_revise',
+    description: 'À utiliser seulement quand l’utilisateur confirme que le client a accepté le devis révisé.',
+    input_schema: { type: 'object', properties: { devisId: { type: 'string' } }, required: ['devisId'] },
+    executer: ({ devisId }) => accepterDevisRevise(devisId),
   },
 );
 

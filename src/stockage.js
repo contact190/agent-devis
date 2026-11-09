@@ -96,7 +96,7 @@ export async function creerDevis({ clientId, lignes, prefixe = 'DEV-AG-', rempla
       designation: l.designation, quantite: l.quantite,
       L: l.configuration.L, H: l.configuration.H,
       prixUnitaireHT: l.prix.prixUnitaireHT, totalHT: l.prix.totalHT,
-      alertes: l.alertes || [], configuration: l.configuration, details: l.details,
+      alertes: l.alertes || [], configuration: l.configuration, details: l.details, entree: l.entree,
     })),
     totalHT: Math.round(lignes.reduce((s, l) => s + l.prix.totalHT, 0) * 100) / 100,
     tvaPourcent: lignes[0]?.prix.tvaPourcent ?? 19,
@@ -143,6 +143,17 @@ export async function enregistrerAvance(id, montant, { minimum = 0.5 } = {}) {
   devis.modifieLe = maintenant();
   await sauver();
   return { devis, totalAvances: total, manque: Math.max(0, Math.ceil(seuil - total)) };
+}
+
+/** Modifie un devis avec une fonction (enregistrée ensuite). */
+export async function mettreAJourDevis(id, modifier) {
+  const d = await charger();
+  const devis = d.devis.find(x => x.id === id);
+  if (!devis) return null;
+  await modifier(devis);
+  devis.modifieLe = maintenant();
+  await sauver();
+  return devis;
 }
 
 /** Pour les tests : repartir d'une base vide. */
