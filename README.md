@@ -15,13 +15,17 @@ en utilisant **le même moteur de calcul que CalculDevis**.
 
 - [x] Moteur de calcul branché hors du navigateur (`src/engine/formula-engine.js`, copié de CalculDevis)
 - [x] Test de la règle fixe bas + ouvrant : H ouvrant = H totale − caisson − H fixe + 25
-- [x] Lecture du catalogue CalculDevis (Supabase, lecture seule) — `npm run charger:catalogue`
+- [x] Catalogue CalculDevis lu en lecture seule et **mis à jour automatiquement** (`src/catalogue.js`) : vérification au plus 1 fois/minute, rechargement dès qu'un prix ou une formule change dans CalculDevis
 - [ ] Agent : texte → récapitulatif à valider → calcul
 - [ ] Devis PDF
 - [ ] Interface clients simple
 - [ ] Avance ≥ 50 % → commande → plan de chantier obligatoire (description texte)
 - [ ] Fiche du métreur, mesures réelles, règle des 100 mm (devis révisé automatique)
 - [ ] Fiches de coupe, vitrage, besoins d'achat
+
+## Plus tard
+
+- **Étape 4** : prix du fournisseur mis à jour automatiquement depuis Dropbox.
 
 ## Règles métier
 
@@ -41,8 +45,8 @@ en utilisant **le même moteur de calcul que CalculDevis**.
 
 ```bash
 npm install
-npm run charger:catalogue
-npm run test:moteur
+npm run test:moteur          # catalogue en direct
+npm run charger:catalogue    # (facultatif) copie locale pour travailler hors ligne
 ```
 
 ## Clé API

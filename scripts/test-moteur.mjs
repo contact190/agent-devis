@@ -10,16 +10,15 @@
 import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { FormulaEngine } from '../src/engine/formula-engine.js';
+import { getCatalogue } from '../src/catalogue.js';
 
+// Sans argument : catalogue CalculDevis en direct (mis à jour automatiquement).
 const chemin = process.argv[2];
-if (!chemin) {
-  console.error('Indiquez le fichier de données. Exemple : node scripts/test-moteur.mjs data/catalogue.json');
-  process.exit(1);
-}
-
-const db = chemin.endsWith('.json')
-  ? JSON.parse(await readFile(chemin, 'utf8'))
-  : (await import(pathToFileURL(chemin).href)).DEFAULT_DATA;
+const db = !chemin
+  ? await getCatalogue()
+  : chemin.endsWith('.json')
+    ? JSON.parse(await readFile(chemin, 'utf8'))
+    : (await import(pathToFileURL(chemin).href)).DEFAULT_DATA;
 
 const engine = new FormulaEngine(db);
 
