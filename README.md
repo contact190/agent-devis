@@ -35,7 +35,9 @@ en utilisant **le même moteur de calcul que CalculDevis**.
 | H ouvrant avec fixe bas | H totale − HC caisson − H fixe + 25 |
 | Caisson | toujours déduit de la hauteur totale |
 | Axe 40 | jamais avec lame 43 |
-| Largeur glissière | toujours demander la profondeur ; largeur = plus petite disponible ≥ profondeur + 10 mm (`src/regles/glissiere.js`) |
+| Type de glissière | tunnel → Simple H25 ; moteur → L invisible ; sangle → L visible |
+| Largeur glissière | toujours demander la profondeur ; plus grande largeur avec largeur + 10 < profondeur ; sinon la plus petite + « PROBLÈME PROFONDEUR — raser » sur la fiche de coupe |
+| Volet (détail complet) | voir `docs/volet.md` et `src/regles/volet.js` |
 | Écart mesure réelle > +100 mm | fabrication bloquée, devis révisé créé automatiquement |
 | Écart mesure réelle < −100 mm | alerte seulement |
 | Passage en commande | avance ≥ 50 % du devis |
