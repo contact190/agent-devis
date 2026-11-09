@@ -34,7 +34,7 @@ en utilisant **le même moteur de calcul que CalculDevis**.
 | Traverse | toujours 25 mm |
 | H ouvrant avec fixe bas | H totale − HC caisson − H fixe + 25 |
 | Caisson | toujours déduit de la hauteur totale |
-| Axe 40 | jamais avec lame 43 |
+| Compatibilités volet (axe, lame, caisson, kit, moteur…) | le catalogue CalculDevis fait foi, rien n'est corrigé ni recopié en dur |
 | Type de glissière | tunnel → Simple H25 ; moteur → L invisible ; sangle → L visible |
 | Largeur glissière | toujours demander la profondeur ; plus grande largeur avec largeur + 10 < profondeur ; sinon la plus petite + « PROBLÈME PROFONDEUR — raser » sur la fiche de coupe |
 | Volet (détail complet) | voir `docs/volet.md` et `src/regles/volet.js` |
