@@ -42,7 +42,8 @@ export function calculerRappels(dossiers, maintenant = Date.now()) {
       const j = joursDepuis(d.dateDevisRevise, maintenant);
       if (j >= DELAIS_RAPPEL_JOURS.devisReviseNonValide) ajouter(1, d, `Devis révisé (écart > 100 mm) en attente d'accord du client depuis ${j} jours.`);
     }
-    if (d.mesuresValidees && !d.fabricationLancee) {
+    // Pas de rappel de fabrication tant qu'un devis révisé attend l'accord du client (fabrication bloquée).
+    if (d.mesuresValidees && !d.fabricationLancee && !(d.devisRevise && !d.devisRevise.valideParClient)) {
       const j = joursDepuis(d.dateMesures, maintenant);
       if (j >= DELAIS_RAPPEL_JOURS.fabricationPasLancee) ajouter(2, d, `Mesures validées il y a ${j} jours, fabrication pas encore lancée.`);
     }
