@@ -8,9 +8,14 @@
     "test:moteur": "node scripts/test-moteur.mjs",
     "charger:catalogue": "node scripts/charger-catalogue.mjs",
     "test:rappels": "node scripts/test-rappels.mjs",
-    "test:volet": "node scripts/test-volet.mjs"
+    "test:volet": "node scripts/test-volet.mjs",
+    "discuter": "node --env-file=.env scripts/discuter.mjs",
+    "test:outils": "node scripts/test-outils.mjs",
+    "test:agent": "node scripts/test-agent-simule.mjs",
+    "test": "node scripts/test-moteur.mjs && node scripts/test-outils.mjs && node scripts/test-agent-simule.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.6.0",
     "mathjs": "^14.0.0"
   }
 }

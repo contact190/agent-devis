@@ -16,7 +16,9 @@ en utilisant **le même moteur de calcul que CalculDevis**.
 - [x] Moteur de calcul branché hors du navigateur (`src/engine/formula-engine.js`, copié de CalculDevis)
 - [x] Test de la règle fixe bas + ouvrant : H ouvrant = H totale − caisson − H fixe + 25
 - [x] Catalogue CalculDevis lu en lecture seule et **mis à jour automatiquement** (`src/catalogue.js`) : vérification au plus 1 fois/minute, rechargement dès qu'un prix ou une formule change dans CalculDevis
-- [ ] Agent : texte → récapitulatif à valider → calcul
+- [x] Outils de l'agent (`src/agent/outils.js`) : catalogue, options volet compatibles, calcul d'une menuiserie — **même prix que CalculDevis au centime**
+- [x] Agent (`src/agent/agent.js`) : consignes métier, questions si info manquante, récapitulatif à valider, puis calcul
+- [ ] Brancher la clé API et tester l'agent en conversation réelle (`npm run discuter`)
 - [ ] Devis PDF
 - [ ] Interface clients simple
 - [ ] Avance ≥ 50 % → commande → plan de chantier obligatoire (description texte)
@@ -43,6 +45,13 @@ en utilisant **le même moteur de calcul que CalculDevis**.
 | Passage en commande | avance ≥ 50 % du devis |
 | Plan de chantier | obligatoire, même pour une seule fenêtre |
 | Rappels | dans l'interface, au début de chaque discussion (pas d'e-mail) — `src/regles/rappels.js` |
+
+## Commandes
+
+```bash
+npm test             # tous les tests (sans clé API)
+npm run discuter     # discuter avec l'agent dans le terminal (clé API dans .env)
+```
 
 ## Lancer le test du moteur
 
