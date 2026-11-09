@@ -19,8 +19,10 @@ en utilisant **le même moteur de calcul que CalculDevis**.
 - [x] Outils de l'agent (`src/agent/outils.js`) : catalogue, options volet compatibles, calcul d'une menuiserie — **même prix que CalculDevis au centime**
 - [x] Agent (`src/agent/agent.js`) : consignes métier, questions si info manquante, récapitulatif à valider, puis calcul
 - [ ] Brancher la clé API et tester l'agent en conversation réelle (`npm run discuter`)
-- [ ] Devis PDF
-- [ ] Interface clients simple
+- [x] Devis PDF (`src/pdf/devis-pdf.js`) : en-tête société, client, lignes, totaux, montant en lettres, conditions particulières
+- [x] Interface clients simple + discussion avec l'agent + rappels (`npm start` → http://localhost:3000)
+- [x] Clients et devis stockés à part de CalculDevis (`src/stockage.js`, fichier local en attendant les tables Supabase)
+- [x] Avance : passage automatique en commande à 50 % du TTC, devis révisé qui remplace l'ancien
 - [ ] Avance ≥ 50 % → commande → plan de chantier obligatoire (description texte)
 - [ ] Fiche du métreur, mesures réelles, règle des 100 mm (devis révisé automatique)
 - [ ] Fiches de coupe, vitrage, besoins d'achat
@@ -50,7 +52,9 @@ en utilisant **le même moteur de calcul que CalculDevis**.
 
 ```bash
 npm test             # tous les tests (sans clé API)
+npm start            # interface web : http://localhost:3000
 npm run discuter     # discuter avec l'agent dans le terminal (clé API dans .env)
+npm run exemple      # crée un devis d'exemple et son PDF dans data/
 ```
 
 ## Lancer le test du moteur

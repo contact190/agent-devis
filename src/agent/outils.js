@@ -4,6 +4,7 @@
 import { FormulaEngine } from '../engine/formula-engine.js';
 import { getCatalogue } from '../catalogue.js';
 import { optionsVolet, glissierePourVolet } from '../regles/volet.js';
+import * as stockage from '../stockage.js';
 
 const norm = s => String(s || '').replace(/\s+/g, '').toLowerCase();
 const arrondi = n => Math.round((Number(n) || 0) * 100) / 100;
@@ -277,6 +278,57 @@ export const OUTILS = [
     executer: input => calculerMenuiserie(input),
   },
 ];
+
+// ───────────────────────── Outils de gestion (clients, devis, avances) ─────────────────────────
+
+OUTILS.push(
+  {
+    name: 'chercher_clients',
+    description: 'Cherche des clients par nom, téléphone ou e-mail. Sans texte : les clients récents.',
+    input_schema: { type: 'object', properties: { recherche: { type: 'string' } } },
+    executer: async ({ recherche = '' }) => (await stockage.listerClients(recherche)).slice(0, 20)
+      .map(c => ({ id: c.id, nom: c.nom, telephone: c.telephone, nbDevis: c.nbDevis })),
+  },
+  {
+    name: 'creer_client',
+    description: 'Crée un client. Vérifier avant avec chercher_clients qu’il n’existe pas déjà.',
+    input_schema: {
+      type: 'object',
+      properties: { nom: { type: 'string' }, telephone: { type: 'string' }, email: { type: 'string' }, adresse: { type: 'string' }, rc: { type: 'string' }, nif: { type: 'string' } },
+      required: ['nom'],
+    },
+    executer: input => stockage.creerClient(input),
+  },
+  {
+    name: 'enregistrer_devis',
+    description: 'Enregistre un devis APRÈS validation du récapitulatif par l’utilisateur. Chaque menuiserie est recalculée par le moteur. remplaceId : id du devis remplacé (devis révisé).',
+    input_schema: {
+      type: 'object',
+      properties: { clientId: { type: 'string' }, menuiseries: { type: 'array', items: schemaMenuiserie }, remplaceId: { type: 'string' } },
+      required: ['clientId', 'menuiseries'],
+    },
+    executer: async ({ clientId, menuiseries, remplaceId }) => {
+      const lignes = [];
+      for (const [i, m] of (menuiseries || []).entries()) {
+        const r = await calculerMenuiserie(m);
+        if (!r.ok) return { ok: false, ligne: i + 1, ...r };
+        lignes.push(r);
+      }
+      const devis = await stockage.creerDevis({ clientId, lignes, remplaceId });
+      return { ok: true, devisId: devis.id, totalHT: devis.totalHT, totalTTC: devis.totalTTC, lienPdf: `/api/devis/${devis.id}/pdf` };
+    },
+  },
+  {
+    name: 'enregistrer_avance',
+    description: 'Enregistre une avance sur un devis. Passe automatiquement en commande à partir de 50 % du TTC. Une commande exige ensuite le plan de chantier.',
+    input_schema: { type: 'object', properties: { devisId: { type: 'string' }, montant: { type: 'number' } }, required: ['devisId', 'montant'] },
+    executer: async ({ devisId, montant }) => {
+      const r = await stockage.enregistrerAvance(devisId, montant);
+      if (!r) return { ok: false, erreurs: [`Devis inconnu : ${devisId}`] };
+      return { ok: true, statut: r.devis.statut, totalAvances: r.totalAvances, manquePour50: r.manque, totalTTC: r.devis.totalTTC };
+    },
+  },
+);
 
 export async function executerOutil(nom, input) {
   const outil = OUTILS.find(o => o.name === nom);

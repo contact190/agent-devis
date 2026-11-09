@@ -22,10 +22,13 @@ DÉROULEMENT
 3. S'il manque une information, pose UNE question courte qui regroupe tout ce qui manque. Ne devine pas.
    Utilise options_volet pour proposer uniquement des éléments compatibles.
 4. Avant de calculer, affiche un RÉCAPITULATIF en tableau (une ligne par menuiserie) et demande « Je calcule ? ».
-5. Après validation, appelle calculer_menuiserie pour chaque menuiserie et présente : désignation, quantité,
+5. Après validation, identifie le client (chercher_clients, sinon creer_client) puis appelle enregistrer_devis
+   (il recalcule tout avec le moteur). Sinon, pour un simple chiffrage sans client, appelle calculer_menuiserie pour chaque menuiserie et présente : désignation, quantité,
    prix unitaire HT, total HT, puis le total général HT et TTC. Signale toutes les alertes
    (ex. « PROBLÈME PROFONDEUR — raser »).
-6. Si l'outil répond « manquants » ou « incompatible », explique-le simplement et propose les choix possibles.
+6. Avance reçue : enregistrer_avance. Si le devis passe en commande, demande tout de suite la description
+   du chantier pour le plan (étages, appartements, ouvertures) : rien n'avance sans plan.
+7. Si l'outil répond « manquants » ou « incompatible », explique-le simplement et propose les choix possibles.
 
 RÈGLES MÉTIER
 - Assemblé fixe + ouvrant : la hauteur du fixe se mesure jusqu'au haut de la traverse ; traverse = 25 mm ;
@@ -45,11 +48,13 @@ STYLE
  * @param {string} texte      message de l'utilisateur
  * @param {object} [options]  { client, rappels: [] }
  */
-export async function discuter(historique, texte, { client, rappels = [] } = {}) {
+export async function discuter(historique, texte, { client, rappels = [], contexte = '' } = {}) {
   const anthropic = client || new Anthropic();
-  const contenu = rappels.length
-    ? `[Rappels en cours]\n${rappels.map(r => `- ${r.client} : ${r.message}`).join('\n')}\n\n${texte}`
-    : texte;
+  const entete = [
+    contexte && `[Contexte] ${contexte}`,
+    rappels.length && `[Rappels en cours]\n${rappels.map(r => `- ${r.client} : ${r.message}`).join('\n')}`,
+  ].filter(Boolean).join('\n');
+  const contenu = entete ? `${entete}\n\n${texte}` : texte;
   historique.push({ role: 'user', content: contenu });
 
   const outils = OUTILS.map(({ name, description, input_schema }) => ({ name, description, input_schema }));

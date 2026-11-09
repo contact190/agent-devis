@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Devis — Idéal Aluminium</title>
+<style>
+  :root { --bleu:#1e3a8a; --bleu-clair:#eff6ff; --gris:#64748b; --bord:#e2e8f0; --fond:#f8fafc; --vert:#047857; --orange:#b45309; --rouge:#b91c1c; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; color:#0f172a; background:var(--fond); height:100vh; display:grid; grid-template-rows:auto 1fr; }
+  header { display:flex; align-items:center; gap:16px; padding:10px 18px; background:white; border-bottom:1px solid var(--bord); }
+  header h1 { font-size:16px; margin:0; color:var(--bleu); white-space:nowrap; }
+  #etat { font-size:12px; color:var(--gris); margin-left:auto; }
+  main { display:grid; grid-template-columns:280px 1fr 380px; min-height:0; }
+  section { min-height:0; overflow:auto; }
+  /* Liste clients */
+  #col-clients { background:white; border-right:1px solid var(--bord); display:flex; flex-direction:column; }
+  .barre { padding:12px; display:flex; gap:8px; border-bottom:1px solid var(--bord); }
+  input, textarea, select { font:inherit; border:1px solid var(--bord); border-radius:8px; padding:7px 10px; width:100%; background:white; }
+  input:focus, textarea:focus { outline:2px solid #93c5fd; border-color:transparent; }
+  button { font:inherit; border:0; border-radius:8px; padding:7px 12px; cursor:pointer; background:var(--bleu); color:white; white-space:nowrap; }
+  button.leger { background:var(--bleu-clair); color:var(--bleu); }
+  button:disabled { opacity:.5; cursor:default; }
+  #liste { list-style:none; margin:0; padding:6px; overflow:auto; flex:1; }
+  #liste li { padding:9px 10px; border-radius:8px; cursor:pointer; display:flex; justify-content:space-between; gap:8px; }
+  #liste li:hover { background:var(--fond); }
+  #liste li.actif { background:var(--bleu-clair); }
+  #liste .nom { font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #liste .sous { font-size:12px; color:var(--gris); }
+  .pastille { font-size:11px; background:var(--fond); border:1px solid var(--bord); border-radius:99px; padding:1px 7px; color:var(--gris); align-self:center; }
+  /* Fiche */
+  #col-fiche { padding:18px 22px; }
+  .vide { color:var(--gris); text-align:center; margin-top:15vh; }
+  .carte { background:white; border:1px solid var(--bord); border-radius:12px; padding:16px; margin-bottom:16px; }
+  .carte h2 { font-size:15px; margin:0 0 12px; }
+  .champs { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; }
+  .champs label { font-size:12px; color:var(--gris); display:grid; gap:3px; }
+  .champs .large { grid-column:1 / -1; }
+  #nom-client { font-size:20px; font-weight:700; border-color:transparent; padding:4px 6px; margin:-4px -6px 10px; width:calc(100% + 12px); }
+  #nom-client:hover { border-color:var(--bord); }
+  table { width:100%; border-collapse:collapse; }
+  th { text-align:left; font-size:12px; color:var(--gris); font-weight:500; padding:6px 8px; border-bottom:1px solid var(--bord); }
+  td { padding:8px; border-bottom:1px solid var(--bord); vertical-align:middle; }
+  td.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .statut { font-size:12px; border-radius:99px; padding:2px 9px; white-space:nowrap; }
+  .s-brouillon { background:#f1f5f9; color:#475569; } .s-devis_envoye { background:#fef3c7; color:var(--orange); }
+  .s-commande { background:#d1fae5; color:var(--vert); } .s-remplace, .s-annule { background:#fee2e2; color:var(--rouge); }
+  .actions { display:flex; gap:6px; justify-content:flex-end; }
+  .actions button { padding:4px 9px; font-size:12px; }
+  .enregistre { font-size:12px; color:var(--vert); opacity:0; transition:opacity .3s; }
+  /* Chat */
+  #col-chat { background:white; border-left:1px solid var(--bord); display:flex; flex-direction:column; }
+  #rappels { padding:10px 12px; border-bottom:1px solid var(--bord); max-height:30%; overflow:auto; }
+  #rappels h3 { font-size:12px; color:var(--gris); margin:0 0 6px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; }
+  .rappel { font-size:12.5px; padding:6px 8px; border-radius:8px; margin-bottom:4px; border-left:3px solid; }
+  .p1 { background:#fef2f2; border-color:var(--rouge); } .p2 { background:#fffbeb; border-color:var(--orange); } .p3 { background:#f8fafc; border-color:var(--gris); }
+  #messages { flex:1; overflow:auto; padding:12px; display:flex; flex-direction:column; gap:10px; }
+  .msg { max-width:92%; padding:9px 12px; border-radius:12px; white-space:pre-wrap; word-wrap:break-word; }
+  .msg.moi { align-self:flex-end; background:var(--bleu); color:white; border-bottom-right-radius:4px; }
+  .msg.agent { align-self:flex-start; background:var(--fond); border:1px solid var(--bord); border-bottom-left-radius:4px; }
+  .msg.agent table { font-size:12px; margin:6px 0; } .msg.agent td, .msg.agent th { padding:3px 5px; }
+  #saisie { display:flex; gap:8px; padding:10px 12px; border-top:1px solid var(--bord); }
+  #saisie textarea { resize:none; height:62px; }
+  #contexte-chat { font-size:12px; color:var(--gris); padding:6px 12px 0; }
+  @media (max-width: 1000px) { main { grid-template-columns:1fr; } #col-clients { max-height:35vh; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Agent Devis · Idéal Aluminium</h1>
+  <span id="etat"></span>
+</header>
+<main>
+  <section id="col-clients">
+    <div class="barre">
+      <input id="recherche" type="search" placeholder="Chercher un client…" autocomplete="off">
+      <button id="nouveau" title="Nouveau client">+ Client</button>
+    </div>
+    <ul id="liste"></ul>
+  </section>
+
+  <section id="col-fiche"><p class="vide">Choisissez un client à gauche,<br>ou écrivez directement à l'agent à droite.</p></section>
+
+  <section id="col-chat">
+    <div id="rappels"></div>
+    <div id="contexte-chat">Discussion générale</div>
+    <div id="messages"></div>
+    <form id="saisie">
+      <textarea id="message" placeholder="Ex. : 3 fenêtres H40 2 vantaux 1200×1350 gris anthracite, volet moteur caisson 185, profondeur 200…"></textarea>
+      <button id="envoyer">Envoyer</button>
+    </form>
+  </section>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const echapper = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const prix = n => (Number(n) || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' DA';
+const STATUTS = { brouillon: 'Brouillon', devis_envoye: 'Envoyé', commande: 'Commande', remplace: 'Remplacé', annule: 'Annulé' };
+const api = async (url, options = {}) => {
+  const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options, body: options.body && JSON.stringify(options.body) });
+  const d = await r.json(); if (!r.ok) throw new Error(d.erreur || r.statusText); return d;
+};
+
+let clientActif = null, conversationId = null;
+
+// ───── Liste des clients ─────
+async function chargerClients() {
+  const clients = await api('/api/clients?q=' + encodeURIComponent($('#recherche').value));
+  $('#liste').innerHTML = clients.map(c => `
+    <li data-id="${c.id}" class="${c.id === clientActif ? 'actif' : ''}">
+      <div style="min-width:0"><div class="nom">${echapper(c.nom)}</div><div class="sous">${echapper(c.telephone || c.id)}</div></div>
+      <span class="pastille">${c.nbDevis} devis</span>
+    </li>`).join('') || '<li class="sous" style="cursor:default">Aucun client</li>';
+}
+let minuteur;
+$('#recherche').addEventListener('input', () => { clearTimeout(minuteur); minuteur = setTimeout(chargerClients, 200); });
+$('#liste').addEventListener('click', e => { const li = e.target.closest('li[data-id]'); if (li) ouvrirClient(li.dataset.id); });
+$('#nouveau').addEventListener('click', async () => {
+  const c = await api('/api/clients', { method: 'POST', body: { nom: 'Nouveau client' } });
+  await chargerClients(); await ouvrirClient(c.id); $('#nom-client').select();
+});
+
+// ───── Fiche client ─────
+async function ouvrirClient(id) {
+  clientActif = id;
+  const c = await api('/api/clients/' + id);
+  document.querySelectorAll('#liste li').forEach(li => li.classList.toggle('actif', li.dataset.id === id));
+  const champ = (k, label, cls = '') => `<label class="${cls}">${label}<input data-champ="${k}" value="${echapper(c[k])}"></label>`;
+  $('#col-fiche').innerHTML = `
+    <div class="carte">
+      <input id="nom-client" data-champ="nom" value="${echapper(c.nom)}">
+      <div class="champs">
+        ${champ('telephone', 'Téléphone')}${champ('email', 'E-mail')}
+        ${champ('adresse', 'Adresse', 'large')}
+        ${champ('rc', 'RC')}${champ('nif', 'NIF')}
+        <label class="large">Notes<textarea data-champ="notes" rows="2">${echapper(c.notes)}</textarea></label>
+      </div>
+      <span class="enregistre" id="enregistre">✓ Enregistré</span>
+    </div>
+    <div class="carte">
+      <h2>Devis</h2>
+      ${c.devis.length ? `<table>
+        <tr><th>N°</th><th>Date</th><th>Statut</th><th class="n">Total TTC</th><th class="n">Avances</th><th></th></tr>
+        ${c.devis.map(d => {
+          const avances = d.avances.reduce((s, a) => s + a.montant, 0);
+          return `<tr>
+            <td><b>${d.id}</b>${d.remplaceId ? `<div class="sous" style="font-size:11px;color:var(--gris)">remplace ${d.remplaceId}</div>` : ''}</td>
+            <td>${new Date(d.creeLe).toLocaleDateString('fr-FR')}</td>
+            <td><span class="statut s-${d.statut}">${STATUTS[d.statut] || d.statut}</span></td>
+            <td class="n">${prix(d.totalTTC)}</td>
+            <td class="n">${avances ? prix(avances) + ` <span style="color:var(--gris)">(${Math.round(avances / d.totalTTC * 100)} %)</span>` : '—'}</td>
+            <td><div class="actions">
+              <button class="leger" data-pdf="${d.id}">PDF</button>
+              ${d.statut === 'brouillon' ? `<button class="leger" data-envoye="${d.id}">Marquer envoyé</button>` : ''}
+              ${['brouillon', 'devis_envoye'].includes(d.statut) ? `<button class="leger" data-avance="${d.id}">Avance</button>` : ''}
+            </div></td></tr>`; }).join('')}
+      </table>` : '<p style="color:var(--gris);margin:0">Pas encore de devis. Décrivez la demande à l\'agent à droite.</p>'}
+    </div>`;
+  $('#contexte-chat').textContent = 'Discussion à propos de : ' + c.nom;
+  history.replaceState(null, '', '#client=' + id);
+}
+
+$('#col-fiche').addEventListener('change', async e => {
+  const k = e.target.dataset.champ; if (!k || !clientActif) return;
+  await api('/api/clients/' + clientActif, { method: 'PATCH', body: { [k]: e.target.value } });
+  const ok = $('#enregistre'); ok.style.opacity = 1; setTimeout(() => ok.style.opacity = 0, 1200);
+  if (k === 'nom' || k === 'telephone') chargerClients();
+});
+$('#col-fiche').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.pdf) window.open('/api/devis/' + b.dataset.pdf + '/pdf', '_blank');
+  if (b.dataset.envoye) { await api('/api/devis/' + b.dataset.envoye + '/statut', { method: 'POST', body: { statut: 'devis_envoye' } }); ouvrirClient(clientActif); chargerRappels(); }
+  if (b.dataset.avance) {
+    const m = parseFloat(String(prompt('Montant de l\'avance reçue (DA) :') || '').replace(/\s/g, '').replace(',', '.'));
+    if (!m) return;
+    const r = await api('/api/devis/' + b.dataset.avance + '/avance', { method: 'POST', body: { montant: m } });
+    alert(r.devis.statut === 'commande'
+      ? 'Avance enregistrée : le devis passe en COMMANDE. Le plan de chantier est maintenant obligatoire.'
+      : `Avance enregistrée. Il manque ${prix(r.manque)} pour atteindre 50 % et passer en commande.`);
+    ouvrirClient(clientActif); chargerRappels();
+  }
+});
+
+// ───── Rappels ─────
+async function chargerRappels() {
+  const r = await api('/api/rappels');
+  $('#rappels').innerHTML = r.length
+    ? `<h3>Rappels (${r.length})</h3>` + r.map(x => `<div class="rappel p${x.priorite}"><b>${echapper(x.client)}</b> — ${echapper(x.message)}</div>`).join('')
+    : '<h3>Rappels</h3><div style="font-size:12.5px;color:var(--gris)">Rien en attente 👍</div>';
+}
+
+// ───── Discussion ─────
+function afficherMessage(texte, qui) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + qui;
+  let html = echapper(texte);
+  if (qui === 'agent') {
+    // Tableaux markdown simples -> tableaux HTML ; **gras**
+    html = html.replace(/((?:^\|.*\|$\n?)+)/gm, bloc => {
+      const lignes = bloc.trim().split('\n').filter(l => !/^\|[\s:|-]+\|$/.test(l));
+      return '<table>' + lignes.map((l, i) => '<tr>' + l.slice(1, -1).split('|').map(c => `<${i ? 'td' : 'th'}>${c.trim()}</${i ? 'td' : 'th'}>`).join('') + '</tr>').join('') + '</table>';
+    }).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+      .replace(/(\/api\/devis\/[\w-]+\/pdf)/g, '<a href="$1" target="_blank">ouvrir le PDF</a>');
+  }
+  div.innerHTML = html;
+  $('#messages').append(div);
+  $('#messages').scrollTop = 1e9;
+  return div;
+}
+$('#saisie').addEventListener('submit', async e => {
+  e.preventDefault();
+  const texte = $('#message').value.trim(); if (!texte) return;
+  $('#message').value = ''; afficherMessage(texte, 'moi');
+  const attente = afficherMessage('…', 'agent'); $('#envoyer').disabled = true;
+  try {
+    const r = await api('/api/chat', { method: 'POST', body: { message: texte, conversationId, clientId: clientActif } });
+    conversationId = r.conversationId || conversationId;
+    attente.remove(); afficherMessage(r.reponse, 'agent');
+    chargerClients(); chargerRappels(); if (clientActif) ouvrirClient(clientActif);
+  } catch (err) { attente.textContent = 'Erreur : ' + err.message; }
+  $('#envoyer').disabled = false;
+});
+$('#message').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#saisie').requestSubmit(); } });
+
+(async () => {
+  const etat = await api('/api/etat');
+  $('#etat').textContent = etat.agentDisponible ? `Agent connecté (${etat.modele})` : '⚠️ Agent non branché : clé API à ajouter';
+  await chargerClients(); chargerRappels();
+  const lien = location.hash.match(/client=([\w-]+)/); // lien direct : #client=CLI-0001
+  if (lien) ouvrirClient(lien[1]);
+})();
+</script>
+</body>
+</html>
