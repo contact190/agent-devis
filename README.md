@@ -15,7 +15,7 @@ en utilisant **le même moteur de calcul que CalculDevis**.
 
 - [x] Moteur de calcul branché hors du navigateur (`src/engine/formula-engine.js`, copié de CalculDevis)
 - [x] Test de la règle fixe bas + ouvrant : H ouvrant = H totale − caisson − H fixe + 25
-- [ ] Lecture du catalogue CalculDevis (Supabase, lecture seule)
+- [x] Lecture du catalogue CalculDevis (Supabase, lecture seule) — `npm run charger:catalogue`
 - [ ] Agent : texte → récapitulatif à valider → calcul
 - [ ] Devis PDF
 - [ ] Interface clients simple
@@ -41,7 +41,8 @@ en utilisant **le même moteur de calcul que CalculDevis**.
 
 ```bash
 npm install
-npm run test:moteur -- <fichier de données>
+npm run charger:catalogue
+npm run test:moteur
 ```
 
 ## Clé API

@@ -5,7 +5,8 @@
   "type": "module",
   "description": "Agent IA de devis menuiserie pour Idéal Aluminium, basé sur le moteur de CalculDevis",
   "scripts": {
-    "test:moteur": "node scripts/test-moteur.mjs"
+    "test:moteur": "node scripts/test-moteur.mjs data/catalogue.json",
+    "charger:catalogue": "node scripts/charger-catalogue.mjs"
   },
   "dependencies": {
     "mathjs": "^14.0.0"
