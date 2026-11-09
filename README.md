@@ -40,6 +40,7 @@ en utilisant **le même moteur de calcul que CalculDevis**.
 | Écart mesure réelle < −100 mm | alerte seulement |
 | Passage en commande | avance ≥ 50 % du devis |
 | Plan de chantier | obligatoire, même pour une seule fenêtre |
+| Rappels | dans l'interface, au début de chaque discussion (pas d'e-mail) — `src/regles/rappels.js` |
 
 ## Lancer le test du moteur
 

@@ -7,7 +7,8 @@
   "scripts": {
     "test:moteur": "node scripts/test-moteur.mjs",
     "charger:catalogue": "node scripts/charger-catalogue.mjs",
-    "test:glissiere": "node scripts/test-glissiere.mjs"
+    "test:glissiere": "node scripts/test-glissiere.mjs",
+    "test:rappels": "node scripts/test-rappels.mjs"
   },
   "dependencies": {
     "mathjs": "^14.0.0"
